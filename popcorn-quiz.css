@@ -1,0 +1,11 @@
+/* CSS for quiz plugin - to be moved to a sepearte file */
+.quiz_overlay {
+	background: rgba(255,255,255,0.92);
+}
+.quiz-form {
+	margin-right: auto;
+	margin-left: auto;
+	width: 50%;
+	text-align: center;
+	margin-top: 15%;	
+}
