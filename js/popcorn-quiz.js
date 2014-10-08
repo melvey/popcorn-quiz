@@ -28,6 +28,7 @@ Popcorn.plugin('quiz', function(options) {
 		answered = false,	// Has this questions been answered as yet?
 		options,			// Options passed to plugin
 		alertNotice, 		// Currently displayed alert div
+		marker,				// Marker on timeline (if set)
 		question; 			// Question paragraph tag
 		
 	/**
@@ -92,8 +93,9 @@ Popcorn.plugin('quiz', function(options) {
 		}
 		
 		// Clear any existing alerts
-		if(alertNotice) {
+		if(alertNotice && alertNotice.parentNode == overlay) {
 			overlay.removeChild(alertNotice);
+			alertNotice = null;
 		}
 		if(valid) {
 			answered = true;
@@ -105,8 +107,12 @@ Popcorn.plugin('quiz', function(options) {
 			overlay.appendChild(alertNotice);
 			
 			setTimeout(function() {
+				if(marker) {
+					marker.setAttribute("class", "quiz_marker quiz_complete");
+				}
 				overlay.style.display = 'none';
 				overlay.removeChild(alertNotice);
+				alertNotice = nul;
 				popcorn.play();
 			}, 1000);
 		} else {
@@ -118,6 +124,34 @@ Popcorn.plugin('quiz', function(options) {
 		}
 		
 		return false;
+	}
+	
+	/**
+	* Draw a marker on the timeline indicating where the question is
+	*/
+	function addMarker(timelineSelector) {
+		if(isNaN(popcorn.duration())) {
+			setTimeout(function() {
+				console.log("Duration is not loaded so waiting a second to try again");
+				addMarker(timelineSelector);
+			},1000);
+		} else {
+			console.log("Duration: "+popcorn.duration());
+			marker = document.createElement("span");
+			marker.setAttribute("class", "quiz_marker quiz_incomplete");
+			console.log(options.start);
+			console.log(popcorn.duration());
+			var timePercent = (options.start / popcorn.video.duration * 100);
+			console.log(timePercent);
+			marker.style.marginLeft = timePercent + '%';
+//			marker.style.marginRight = (99-timePercent)+'%';
+			marker.style.width = '0.5%';
+			var timelineElement = document.querySelector(options.timeline);
+			console.log(timelineElement);
+			if(timelineElement) {
+				timelineElement.appendChild(marker);
+			}		
+		}
 	}
 	
 	
@@ -219,7 +253,11 @@ Popcorn.plugin('quiz', function(options) {
 			// Add listener on scan to prevent user skipping the question
 			popcorn.video.addEventListener('seeked', seeked);
 			
-
+			// Add marker if we have been given a timeline to draw it on
+			if(options.timeline) {
+				addMarker(options.timeline);
+			}
+			console.log(popcorn);
 			
 		},
 		start: function(event, track) {

@@ -9,3 +9,13 @@
 	text-align: center;
 	margin-top: 15%;	
 }
+
+.quiz_marker.quiz_incomplete {
+	color:rgba(240,253,0,0.75);
+	background:rgba(240,253,0,0.75);
+}
+
+.quiz_marker.quiz_complete {
+	color:rgba(0,255,5,0.79);
+	background:rgba(0,255,5,0.79);
+}
