@@ -22,14 +22,15 @@
 */
 Popcorn.plugin('quiz', function(options) {
 	var popcorn = this, 
-		submit, 			// Submit input button to submit answers
-		overlay,			// Div DOM object the overlay video and contain the questions
-		quizForm, 			// The form DOM object
-		answered = false,	// Has this questions been answered as yet?
-		options,			// Options passed to plugin
-		alertNotice, 		// Currently displayed alert div
-		marker,				// Marker on timeline (if set)
-		question; 			// Question paragraph tag
+		submit, 				// Submit input button to submit answers
+		overlay,				// Div DOM object the overlay video and contain the questions
+		quizForm, 				// The form DOM object
+		answered = false,		// Has this questions been answered as yet?
+		options,				// Options passed to plugin
+		alertNotice, 			// Currently displayed alert div
+		marker,					// Marker on timeline (if set)
+		caseSensitive = true,	// Is the answer case sensitive
+		question; 				// Question paragraph tag
 		
 	/**
 	* Event handler for video seek
@@ -81,12 +82,12 @@ Popcorn.plugin('quiz', function(options) {
 		
 		// Compare answer to options specified
 		for(i=0; i<options.answers.length; i++) {
-			if(options.answers[i].value == answer) {
-				if(options.answers[i].correct) {
+			if(options.answers[i].correct) {
+				if((options.caseSensitive === true || options.caseSensitive === undefined) && options.answers[i].value === answer) {
 					valid = true;
 					break;
-				} else {
-					valid = false;
+				} else if(options.caseSensitive === false && options.answers[i].value.toUpperCase() === answer.toUpperCase()) {
+					valid = true;
 					break;
 				}
 			}
@@ -112,7 +113,7 @@ Popcorn.plugin('quiz', function(options) {
 				}
 				overlay.style.display = 'none';
 				overlay.removeChild(alertNotice);
-				alertNotice = nul;
+				alertNotice = null;
 				popcorn.play();
 			}, 1000);
 		} else {
@@ -167,7 +168,8 @@ Popcorn.plugin('quiz', function(options) {
 				id: {elem: 'input', type: 'text', label: 'ID for question'},
 				type: {elem: 'input', type:'text', label: 'Input type for quiz'},
 				question: {elem: 'input', type: 'text', label: 'Question text'},
-				answers: {elem: 'input', type: 'array', label: 'Answers'}
+				answers: {elem: 'input', type: 'array', label: 'Answers'},
+				caseSensitive: {elem: 'input', type: 'boolean', label: 'Case sensitive matching for answer'}
 			}
 		},
 		_setup: function(options) {
@@ -179,6 +181,11 @@ Popcorn.plugin('quiz', function(options) {
 			// Default to text input
 			if(!options.type) {
 				options.type = 'text';
+			}
+			
+			// Default to case sensitive input
+			if(options.caseSensitive === undefined) {
+				options.caseSensitive = true;
 			}
 			
 			// Create the overlay div
