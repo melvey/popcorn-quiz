@@ -27,6 +27,7 @@ Options
 | id | string | random | The DOM ID to apply to the video overlay |
 | question | string | none | The question text to display to users |
 | answers | array | none | Answers to be displayed for radio buttons and correct answers for a text input |
+| caseSensitive | boolean | true | Flag indicating if correct answer is case sensitive |
 
 Requirements
 =============
