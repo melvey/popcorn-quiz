@@ -28,6 +28,7 @@ Options
 | question | string | none | The question text to display to users |
 | answers | array | none | Answers to be displayed for radio buttons and correct answers for a text input |
 | caseSensitive | boolean | true | Flag indicating if correct answer is case sensitive |
+| repeat | boolean | false | Should the question be repeated if the viewer seeks back and rewatches it |
 
 Requirements
 =============

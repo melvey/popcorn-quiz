@@ -31,7 +31,27 @@ Popcorn.plugin('quiz', function(options) {
 		marker,					// Marker on timeline (if set)
 		caseSensitive = true,	// Is the answer case sensitive
 		question; 				// Question paragraph tag
-		
+	
+	/**
+	* Pause video and show question dialog - Called on start event
+	**/
+	function askQuestion() {
+		// Show quiz questions
+		if((!answered || options.repeat) && popcorn.video.currentTime - options.start < 2) {
+			popcorn.pause();
+			var rect = popcorn.video.getBoundingClientRect();
+			overlay.style.top = rect.top+"px";
+			overlay.style.right = rect.right+"px";
+			overlay.style.bottom = rect.bottom+"px";
+			overlay.style.left = rect.left+"px";
+			overlay.style.width = popcorn.video.offsetWidth+"px";
+			overlay.style.height = popcorn.video.offsetHeight+"px";
+			overlay.style.display = 'block';
+			document.body.appendChild(overlay);
+		}
+	}
+	
+	
 	/**
 	* Event handler for video seek
 	* Check if the video has seeked past the unanswered question. If so jump back to show the question
@@ -40,7 +60,7 @@ Popcorn.plugin('quiz', function(options) {
 		// If the user has scanned past the question but hasn't answered it yet go back
 		if(popcorn.video.currentTime > options.start && answered == false) {
 			popcorn.video.currentTime = options.start;
-			console.log("User seeked past video");
+			askQuestion();
 		} else if (popcorn.video.currentTime < options.start) {
 			// If we are currently showing the video and we have scanned back hide it
 			// This is important to avoid fighting with earlier questions that may want to take control
@@ -164,7 +184,8 @@ Popcorn.plugin('quiz', function(options) {
 				type: {elem: 'input', type:'text', label: 'Input type for quiz'},
 				question: {elem: 'input', type: 'text', label: 'Question text'},
 				answers: {elem: 'input', type: 'array', label: 'Answers'},
-				caseSensitive: {elem: 'input', type: 'boolean', label: 'Case sensitive matching for answer'}
+				caseSensitive: {elem: 'input', type: 'boolean', label: 'Case sensitive matching for answer'},
+				repeat: {elem: 'input', type: 'boolean', label: 'Should the question be repeated if the viewer seeks back and rewatches it'}
 			}
 		},
 		_setup: function(options) {
@@ -263,19 +284,7 @@ Popcorn.plugin('quiz', function(options) {
 			}
 			
 		},
-		start: function(event, track) {
-			// Show quiz questions
-			popcorn.pause();
-			var rect = popcorn.video.getBoundingClientRect();
-			overlay.style.top = rect.top+"px";
-			overlay.style.right = rect.right+"px";
-			overlay.style.bottom = rect.bottom+"px";
-			overlay.style.left = rect.left+"px";
-			overlay.style.width = popcorn.video.offsetWidth+"px";
-			overlay.style.height = popcorn.video.offsetHeight+"px";
-			overlay.style.display = 'block';
-			document.body.appendChild(overlay);
-		},
+		start: askQuestion,
 		end: function(event, track) {
 			console.log("Ending");
 			// Hide quiz
