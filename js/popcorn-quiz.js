@@ -45,7 +45,7 @@ Popcorn.plugin('quiz', function(options) {
 			// If we are currently showing the video and we have scanned back hide it
 			// This is important to avoid fighting with earlier questions that may want to take control
 			overlay.style.display = 'none';
-			popcorn.play();
+//			popcorn.play();
 			console.log("Seeked before video so ensure we are hidden");
 		}
 	}
@@ -137,18 +137,13 @@ Popcorn.plugin('quiz', function(options) {
 				addMarker(timelineSelector);
 			},1000);
 		} else {
-			console.log("Duration: "+popcorn.duration());
 			marker = document.createElement("span");
 			marker.setAttribute("class", "quiz_marker quiz_incomplete");
-			console.log(options.start);
-			console.log(popcorn.duration());
 			var timePercent = (options.start / popcorn.video.duration * 100);
-			console.log(timePercent);
 			marker.style.marginLeft = timePercent + '%';
 //			marker.style.marginRight = (99-timePercent)+'%';
 			marker.style.width = '0.5%';
 			var timelineElement = document.querySelector(options.timeline);
-			console.log(timelineElement);
 			if(timelineElement) {
 				timelineElement.appendChild(marker);
 			}		
@@ -221,14 +216,16 @@ Popcorn.plugin('quiz', function(options) {
 						input.setAttribute('id', inputID);
 						input.setAttribute('name', options.id+'_answer');
 						label = document.createElement('label');
-						label.appendChild(input);
+						label.setAttribute('for', inputID);
 						label.innerHTML = label.innerHTML + answer.text;
 						
 						div = document.createElement('div');
 						div.setAttribute('class', 'radio');
+						div.appendChild(input);
 						div.appendChild(label);
 						quizForm.appendChild(div);
-						console.log(answer);
+
+						answerCount++;
 					});
 					break;
 				case 'text':
@@ -264,12 +261,10 @@ Popcorn.plugin('quiz', function(options) {
 			if(options.timeline) {
 				addMarker(options.timeline);
 			}
-			console.log(popcorn);
 			
 		},
 		start: function(event, track) {
 			// Show quiz questions
-			console.log("Starting");		
 			popcorn.pause();
 			var rect = popcorn.video.getBoundingClientRect();
 			overlay.style.top = rect.top+"px";
