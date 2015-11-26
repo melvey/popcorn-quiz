@@ -29,6 +29,10 @@ Options
 | answers | array | none | Answers to be displayed for radio buttons and correct answers for a text input |
 | caseSensitive | boolean | true | Flag indicating if correct answer is case sensitive |
 | repeat | boolean | false | Should the question be repeated if the viewer seeks back and rewatches it |
+| repeat | boolean | false | Should the question be repeated if the viewer seeks back and rewatches it |
+| verticallyCentre | boolean | true | Vertically align the question form in the video |
+| centreText | boolean | false | Align questions in the center if they are smaller than the question area. Has no impact if text-align center is used |
+
 
 Requirements
 =============

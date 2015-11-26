@@ -48,6 +48,36 @@ Popcorn.plugin('quiz', function(options) {
 			overlay.style.height = popcorn.video.offsetHeight+"px";
 			overlay.style.display = 'block';
 			document.body.appendChild(overlay);
+			
+			if(options.verticallyCentre) {
+				// Position element in the middle
+				var heightOffset = (overlay.offsetHeight - quizForm.offsetHeight) / 2;
+				quizForm.style.marginTop = heightOffset + 'px';
+			}
+			
+			if(options.centreQuestions) {
+				if(options.type === 'radio') {
+					// Get the widest label
+					var maxWidth = 0;
+					var radioDivs = quizForm.childNodes;
+					var index = 0;
+					for(index = 0; index < radioDivs.length; index++) {
+						console.log(radioDivs[index].childNodes[1]);
+						if(radioDivs[index].childNodes.length > 1 && radioDivs[index].childNodes[1].tagName === 'LABEL') {
+							if(radioDivs[index].childNodes[1].offsetWidth > maxWidth) {
+								maxWidth = radioDivs[index].childNodes[1].offsetWidth;
+							}
+						}
+					}
+					var marginLeft = ((quizForm.offsetWidth - maxWidth) / 2) + 'px';
+					// Now offset all so the widest is centered
+					for(index = 0; index < radioDivs.length; index++) {
+						if(radioDivs[index].className === 'radio') {
+							radioDivs[index].style.marginLeft = marginLeft;
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -185,7 +215,9 @@ Popcorn.plugin('quiz', function(options) {
 				question: {elem: 'input', type: 'text', label: 'Question text'},
 				answers: {elem: 'input', type: 'array', label: 'Answers'},
 				caseSensitive: {elem: 'input', type: 'boolean', label: 'Case sensitive matching for answer'},
-				repeat: {elem: 'input', type: 'boolean', label: 'Should the question be repeated if the viewer seeks back and rewatches it'}
+				repeat: {elem: 'input', type: 'boolean', label: 'Should the question be repeated if the viewer seeks back and rewatches it'},
+				verticallyCentre: {elem: 'input', type: 'boolean', label: 'Vertically align the question form in the video'},
+				centreQuestions: {elem: 'input', type: 'boolean', label: 'Align questions in the center if they are smaller than the question area'}
 			}
 		},
 		_setup: function(options) {
@@ -203,6 +235,11 @@ Popcorn.plugin('quiz', function(options) {
 			if(options.caseSensitive === undefined) {
 				options.caseSensitive = true;
 			}
+			
+			// Cater to american spelling
+			options.verticallyCentre = options.verticallyCentre || options.verticallyCenter || true;
+			options.centreQuestions = options.centreQuestions || options.centerQuestions || false;
+
 			
 			// Create the overlay div
 			overlay = document.createElement('div');

@@ -19,3 +19,21 @@
 	color:rgba(0,255,5,0.79);
 	background:rgba(0,255,5,0.79);
 }
+
+.question_text {
+	font-size: 5em;
+	color: #767676;
+}
+.quiz-form .radio {
+	text-align: left;
+}
+.quiz-form .radio input {
+	display: none;
+}
+.quiz-form .radio label {
+	font-size: 3em;
+	color: #767676;
+}
+.quiz-form :checked + label {
+   font-weight: bold;
+}
