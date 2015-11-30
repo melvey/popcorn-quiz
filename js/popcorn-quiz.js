@@ -32,6 +32,47 @@ Popcorn.plugin('quiz', function(options) {
 		caseSensitive = true,	// Is the answer case sensitive
 		question; 				// Question paragraph tag
 	
+	
+	function setOverlayDimensions() {
+		var rect = popcorn.video.getBoundingClientRect();
+		overlay.style.top = rect.top+"px";
+		overlay.style.right = rect.right+"px";
+		overlay.style.bottom = rect.bottom+"px";
+		overlay.style.left = rect.left+"px";
+		overlay.style.width = popcorn.video.offsetWidth+"px";
+		overlay.style.height = popcorn.video.offsetHeight+"px";
+		
+		if(options.verticallyCentre) {
+			// Position element in the middle
+			var heightOffset = (overlay.offsetHeight - quizForm.offsetHeight) / 2;
+			quizForm.style.marginTop = heightOffset + 'px';
+		}
+	}
+	
+	function centreQuestions() {
+		if(options.type === 'radio') {
+			// Get the widest label
+			var maxWidth = 0;
+			var radioDivs = quizForm.childNodes;
+			var index = 0;
+			for(index = 0; index < radioDivs.length; index++) {
+				console.log(radioDivs[index].childNodes[1]);
+				if(radioDivs[index].childNodes.length > 1 && radioDivs[index].childNodes[1].tagName === 'LABEL') {
+					if(radioDivs[index].childNodes[1].offsetWidth > maxWidth) {
+						maxWidth = radioDivs[index].childNodes[1].offsetWidth;
+					}
+				}
+			}
+			var marginLeft = ((quizForm.offsetWidth - maxWidth) / 2) + 'px';
+			// Now offset all so the widest is centered
+			for(index = 0; index < radioDivs.length; index++) {
+				if(radioDivs[index].className === 'radio') {
+					radioDivs[index].style.marginLeft = marginLeft;
+				}
+			}
+		}
+	}
+
 	/**
 	* Pause video and show question dialog - Called on start event
 	**/
@@ -39,44 +80,16 @@ Popcorn.plugin('quiz', function(options) {
 		// Show quiz questions
 		if((!answered || options.repeat) && popcorn.video.currentTime - options.start < 2) {
 			popcorn.pause();
-			var rect = popcorn.video.getBoundingClientRect();
-			overlay.style.top = rect.top+"px";
-			overlay.style.right = rect.right+"px";
-			overlay.style.bottom = rect.bottom+"px";
-			overlay.style.left = rect.left+"px";
-			overlay.style.width = popcorn.video.offsetWidth+"px";
-			overlay.style.height = popcorn.video.offsetHeight+"px";
+			setOverlayDimensions();
 			overlay.style.display = 'block';
 			document.body.appendChild(overlay);
 			
-			if(options.verticallyCentre) {
-				// Position element in the middle
-				var heightOffset = (overlay.offsetHeight - quizForm.offsetHeight) / 2;
-				quizForm.style.marginTop = heightOffset + 'px';
+			if(options.centreQuestions) {
+				centreQuestions();
 			}
 			
-			if(options.centreQuestions) {
-				if(options.type === 'radio') {
-					// Get the widest label
-					var maxWidth = 0;
-					var radioDivs = quizForm.childNodes;
-					var index = 0;
-					for(index = 0; index < radioDivs.length; index++) {
-						console.log(radioDivs[index].childNodes[1]);
-						if(radioDivs[index].childNodes.length > 1 && radioDivs[index].childNodes[1].tagName === 'LABEL') {
-							if(radioDivs[index].childNodes[1].offsetWidth > maxWidth) {
-								maxWidth = radioDivs[index].childNodes[1].offsetWidth;
-							}
-						}
-					}
-					var marginLeft = ((quizForm.offsetWidth - maxWidth) / 2) + 'px';
-					// Now offset all so the widest is centered
-					for(index = 0; index < radioDivs.length; index++) {
-						if(radioDivs[index].className === 'radio') {
-							radioDivs[index].style.marginLeft = marginLeft;
-						}
-					}
-				}
+			if(options.openFunction) {
+				options.openFunction();
 			}
 		}
 	}
@@ -165,6 +178,9 @@ Popcorn.plugin('quiz', function(options) {
 				overlay.removeChild(alertNotice);
 				alertNotice = null;
 				popcorn.play();
+				if(options.closeFunction) {
+					options.closeFunction();
+				}
 			}, 1000);
 		} else {
 			alertNotice = document.createElement('p');
@@ -220,7 +236,7 @@ Popcorn.plugin('quiz', function(options) {
 				centreQuestions: {elem: 'input', type: 'boolean', label: 'Align questions in the center if they are smaller than the question area'}
 			}
 		},
-		_setup: function(options) {
+		_setup: function() {
 		
 			// If the ID is not set create a random ID
 			if(!options.id) {
@@ -319,6 +335,13 @@ Popcorn.plugin('quiz', function(options) {
 			if(options.timeline) {
 				addMarker(options.timeline);
 			}
+			
+			window.addEventListener('resize', function() {
+				setOverlayDimensions();
+				if(options.centreQuestions) {
+					centreQuestions();
+				}
+			}, true);
 			
 		},
 		start: askQuestion,
