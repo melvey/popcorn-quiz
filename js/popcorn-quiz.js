@@ -56,7 +56,6 @@ Popcorn.plugin('quiz', function(options) {
 			var radioDivs = quizForm.childNodes;
 			var index = 0;
 			for(index = 0; index < radioDivs.length; index++) {
-				console.log(radioDivs[index].childNodes[1]);
 				if(radioDivs[index].childNodes.length > 1 && radioDivs[index].childNodes[1].tagName === 'LABEL') {
 					if(radioDivs[index].childNodes[1].offsetWidth > maxWidth) {
 						maxWidth = radioDivs[index].childNodes[1].offsetWidth;
@@ -80,9 +79,9 @@ Popcorn.plugin('quiz', function(options) {
 		// Show quiz questions
 		if((!answered || options.repeat) && popcorn.video.currentTime - options.start < 2) {
 			popcorn.pause();
-			setOverlayDimensions();
 			overlay.style.display = 'block';
 			document.body.appendChild(overlay);
+			setOverlayDimensions();
 			
 			if(options.centreQuestions) {
 				centreQuestions();
@@ -164,31 +163,40 @@ Popcorn.plugin('quiz', function(options) {
 		if(valid) {
 			answered = true;
 			
-			alertNotice = document.createElement('p');
-			alertNotice.setAttribute('class', 'alert alert-success');
-			alertNotice.setAttribute('role', 'alert');
-			alertNotice.innerHTML = 'Correct';
+			alertNotice = document.createElement('div');
+			alertNotice.setAttribute('class', 'alert-container');
+			alertContent = document.createElement('div');
+			alertContent.setAttribute('class', 'alert alert-success alert-correct');
+			alertContent.setAttribute('role', 'alert');
+			alertContent.innerHTML = 'Correct';
+			alertNotice.appendChild(alertContent);
 			overlay.appendChild(alertNotice);
-			
-			setTimeout(function() {
+		} else {
+			alertNotice = document.createElement('div');
+			alertNotice.setAttribute('class', 'alert-container');
+			alertContent = document.createElement('div');
+			alertContent.setAttribute('class', 'alert alert-danger alert-incorrect');
+			alertContent.setAttribute('role', 'alert');
+			alertContent.innerHTML = 'Incorrect';
+			alertNotice.appendChild(alertContent);
+			overlay.appendChild(alertNotice);
+		}
+		setTimeout(function() {
+			// Remove alert
+			overlay.removeChild(alertNotice);
+			alertNotice = null;
+			// Continue if we're correct
+			if(valid) {
 				if(marker) {
 					marker.setAttribute("class", "quiz_marker quiz_complete");
 				}
 				overlay.style.display = 'none';
-				overlay.removeChild(alertNotice);
-				alertNotice = null;
 				popcorn.play();
 				if(options.closeFunction) {
 					options.closeFunction();
 				}
-			}, 1000);
-		} else {
-			alertNotice = document.createElement('p');
-			alertNotice.setAttribute('class', 'alert alert-danger');
-			alertNotice.setAttribute('role', 'alert');
-			alertNotice.innerHTML = 'Incorrect';
-			overlay.appendChild(alertNotice);
-		}
+			}
+		}, 1000);
 		
 		return false;
 	}
@@ -354,7 +362,7 @@ Popcorn.plugin('quiz', function(options) {
 		},
 		_teardown: function(track) {
 			// Remove all DOM elements and event listeners
-			submit.removeEventListener('click', submitClick, false);
+			submit.removeEventListener('click', submitted, false);
 			document.removeChild(overlay);
 		}
 	};
