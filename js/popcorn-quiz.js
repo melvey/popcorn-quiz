@@ -203,9 +203,10 @@ Popcorn.plugin('quiz', function(options) {
 	
 	/**
 	* Draw a marker on the timeline indicating where the question is
+	* Chrome incorrectly reports metadata is loaded before duration is set so this function will re-call itself on a 1 second timeout if duration is not loaded
 	*/
 	function addMarker(timelineSelector) {
-		if(isNaN(popcorn.duration())) {
+		if(popcorn.video.readyState <= 0 || isNaN(popcorn.video.duration) || popcorn.video.duration <= 0) {
 			setTimeout(function() {
 				console.log("Duration is not loaded so waiting a second to try again");
 				addMarker(timelineSelector);
@@ -341,7 +342,11 @@ Popcorn.plugin('quiz', function(options) {
 			
 			// Add marker if we have been given a timeline to draw it on
 			if(options.timeline) {
-				addMarker(options.timeline);
+				var loadFunction = function() {
+					addMarker(options.timeline);
+					popcorn.video.removeEventListener('loadedmetadata', loadFunction);
+				};
+				popcorn.video.addEventListener('loadedmetadata', loadFunction);
 			}
 			
 			window.addEventListener('resize', function() {
